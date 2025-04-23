@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AQL Calculator</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 1rem; }
+    .card { padding: 1rem; border: 1px solid #ccc; border-radius: 8px; background: #f9f9f9; }
+    label { display: block; margin-top: 1rem; font-weight: bold; }
+    input, select, button { width: 100%; padding: 0.5rem; margin-top: 0.25rem; }
+    .result { margin-top: 1rem; background: #eef; padding: 1rem; border-radius: 6px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Inspection Sampling Calculator</h2>
+    <label for="lotSize">Lot Size</label>
+    <input type="number" id="lotSize" value="1000" />
+
+    <label for="aql">AQL</label>
+    <select id="aql">
+      <option value="0.65">0.65</option>
+    </select>
+
+    <label for="samplingType">Sampling Type</label>
+    <select id="samplingType">
+      <option value="c0">Zero Defect (c=0)</option>
+      <option value="z14">ANSI/ASQ Z1.4</option>
+    </select>
+
+    <button onclick="calculate()">Calculate Sample Size</button>
+
+    <div id="result" class="result"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
