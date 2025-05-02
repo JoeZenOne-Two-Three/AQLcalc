@@ -2,43 +2,210 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AQL Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de análisis de defectos | Defect Analysis Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 1rem; }
-    .card { padding: 1rem; border: 1px solid #ccc; border-radius: 8px; background: #f9f9f9; }
-    label { display: block; margin-top: 1rem; font-weight: bold; }
-    input, select, button { width: 100%; padding: 0.5rem; margin-top: 0.25rem; }
-    .result { margin-top: 1rem; background: #eef; padding: 1rem; border-radius: 6px; text-align: center; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .tab-button.active { 
+      background-color: #3b82f6;
+      color: white;
+    }
+    [lang="es"] { display: none; }
+    .language-active[lang="es"] { display: block; }
+    .language-active[lang="en"] { display: none; }
   </style>
 </head>
-<body>
-  <div class="card">
-    <h2>Inspection Sampling Calculator</h2>
-    <label for="lotSize">Lot Size</label>
-    <input type="number" id="lotSize" value="1000" />
+<body class="bg-gray-50 text-gray-800">
+  <div class="max-w-4xl mx-auto mt-8 p-4 relative">
+    <button id="languageToggle" class="absolute top-0 right-0 bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-sm">
+      Español
+    </button>
+    
+    <div class="space-y-8">
+      <header class="text-center">
+        <h1 class="text-3xl font-bold text-gray-800">
+          <span lang="en">Defect Analysis Calculator</span>
+          <span lang="es" class="language-active">Calculadora de análisis de defectos</span>
+        </h1>
+        <p class="text-gray-600 mt-2">
+          <span lang="en">Calculate defect rates and required sample sizes</span>
+          <span lang="es" class="language-active">Calcular las tasas de defectos y los tamaños de muestra necesarios</span>
+        </p>
+      </header>
 
-    <label for="aql">AQL</label>
-    <select id="aql">
-      <option value="0.1">0.1</option>
-      <option value="0.4">0.4</option>
-      <option value="0.65">0.65</option>
-      <option value="1.0">1.0</option>
-      <option value="2.5">2.5</option>
-    </select>
+      <div class="flex border-b">
+        <button class="tab-button active px-4 py-2 font-medium text-white bg-blue-600 font-sans" data-tab="defect">
+          <span lang="en">Defect Analysis Sample Size</span>
+          <span lang="es" class="language-active">Tamaño de muestra para análisis de defectos</span>
+        </button>
+      </div>
 
-    <label for="samplingType">Sampling Type</label>
-    <select id="samplingType">
-      <option value="c0">Zero Defect (c=0)</option>
-      <option value="z14">ANSI/ASQ Z1.4</option>
-    </select>
+      <!-- Defect Analysis Tab -->
+      <div id="defect" class="tab-content active">
+        <div class="bg-white rounded-xl shadow-sm p-6 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-1">
+              <label for="defects" class="block text-sm font-medium">
+                <span lang="en">Number of Defects Found</span>
+                <span lang="es" class="language-active">Número de defectos encontrados</span>
+              </label>
+              <p class="text-sm text-gray-500">
+                <span lang="en">Enter the number of defects found below</span>
+                <span lang="es" class="language-active">Ingrese el número de defectos encontrados a continuación</span>
+              </p>
+              <input id="defects" type="number" placeholder="0" class="border p-2 rounded w-full" />
+            </div>
+            <div class="space-y-1">
+              <label for="sampleSizeDefect" class="block text-sm font-medium">
+                <span lang="en">Sample Size</span>
+                <span lang="es" class="language-active">Tamaño de muestra</span>
+              </label>
+              <p class="text-sm text-gray-500">
+                <span lang="en">Enter the total number of samples you took</span>
+                <span lang="es" class="language-active">Ingrese el número total de muestras que tomó</span>
+              </p>
+              <input id="sampleSizeDefect" type="number" placeholder="0" class="border p-2 rounded w-full" />
+            </div>
+          </div>
+          <button onclick="calculateRate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded">
+            <span lang="en">Calculate Defect Rate</span>
+            <span lang="es" class="language-active">Calcular la tasa de defectos</span>
+          </button>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+            <div class="space-y-1">
+              <label for="defectRate" class="block text-sm font-medium">
+                <span lang="en">Defect Rate (%)</span>
+                <span lang="es" class="language-active">Tasa de defectos (%)</span>
+              </label>
+              <p class="text-sm text-gray-500">
+                <span lang="en">Enter manually or use the calculator above</span>
+                <span lang="es" class="language-active">Ingrese manualmente o utilice la calculadora de arriba</span>
+              </p>
+              <input id="defectRate" type="number" step="0.01" placeholder="0.00" class="border p-2 rounded w-full" />
+            </div>
+            <div class="space-y-1">
+              <label for="confidence" class="block text-sm font-medium">
+                <span lang="en">Confidence Level (%)</span>
+                <span lang="es" class="language-active">Nivel de confianza (%)</span>
+              </label>
+              <p class="text-sm text-gray-500">
+                <span lang="en">Enter statistical confidence level (typically 95%)</span>
+                <span lang="es" class="language-active">Ingrese el nivel de confianza estadística (normalmente 95%)</span>
+              </p>
+              <input id="confidence" type="number" step="1" value="95" placeholder="95" class="border p-2 rounded w-full" />
+            </div>
+          </div>
+          <button onclick="calculateSample()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
+            <span lang="en">Calculate Required Sample Size</span>
+            <span lang="es" class="language-active">Calcular el tamaño de muestra requerido</span>
+          </button>
+        </div>
 
-    <button onclick="calculate()">Calculate Sample Size</button>
-
-    <div id="result" class="result"></div>
+        <div id="defectResults" class="bg-white rounded-xl shadow-sm p-6 mt-4 hidden">
+          <h2 class="text-xl font-semibold border-b pb-2 mb-4">
+            <span lang="en">Results</span>
+            <span lang="es" class="language-active">Resultados</span>
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-3">
+              <div class="flex justify-between">
+                <span class="text-gray-600">
+                  <span lang="en">Defect Rate:</span>
+                  <span lang="es" class="language-active">Tasa de defectos:</span>
+                </span>
+                <span id="defectRateResult" class="font-medium">-</span>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <div class="flex justify-between">
+                <span class="text-gray-600">
+                  <span lang="en">Required Sample Size:</span>
+                  <span lang="es" class="language-active">Tamaño de muestra requerido:</span>
+                </span>
+                <span id="requiredSampleSize" class="font-medium">-</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Formula Explanation -->
+          <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-medium mb-2">
+              <span lang="en">Calculation Method</span>
+              <span lang="es" class="language-active">Método de cálculo</span>
+            </h3>
+            <p class="text-sm text-gray-600 mb-1">
+              <span lang="en"><strong>Defect Rate:</strong> (Defects Found / Sample Size) × 100</span>
+              <span lang="es" class="language-active"><strong>Tasa de defectos:</strong> (Defectos encontrados / Tamaño de muestra) × 100</span>
+            </p>
+            <p class="text-sm text-gray-600">
+              <span lang="en"><strong>Sample Size Formula:</strong> n = ln(1 - confidence) / ln(1 - defectRate)</span>
+              <span lang="es" class="language-active"><strong>Fórmula de tamaño de muestra:</strong> n = ln(1 - confianza) / ln(1 - tasaDefectos)</span>
+            </p>
+            <p class="text-sm text-gray-600 mt-2">
+              <span lang="en">This calculates how many samples you need to have a (confidence)% chance of finding at least one defect.</span>
+              <span lang="es" class="language-active">Esto calcula cuántas muestras necesita para tener un (confianza)% de probabilidad de encontrar al menos un defecto.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <script src="app.js"></script>
+  <script>
+    // Language Toggle
+    document.getElementById('languageToggle').addEventListener('click', function() {
+      const elements = document.querySelectorAll('[lang="es"], [lang="en"]');
+      const isSpanish = this.textContent === 'Español';
+      
+      this.textContent = isSpanish ? 'English' : 'Español';
+      
+      elements.forEach(el => {
+        if (el.hasAttribute('lang')) {
+          el.classList.toggle('language-active');
+        }
+      });
+    });
+
+    // Defect Analysis
+    function calculateRate() {
+      const defects = parseInt(document.getElementById("defects").value);
+      const size = parseInt(document.getElementById("sampleSizeDefect").value);
+      const resultDiv = document.getElementById("defectRateResult");
+      
+      if (isNaN(defects) || isNaN(size) || size <= 0 || defects < 0) {
+        const errorMsg = document.querySelector('[lang="en"]').classList.contains('language-active') ? 
+          "Invalid input (defects ≥ 0, sample size > 0)" : 
+          "Entrada inválida (defectos ≥ 0, tamaño muestra > 0)";
+        resultDiv.textContent = errorMsg;
+        return;
+      }
+      
+      const rate = ((defects / size) * 100).toFixed(2);
+      document.getElementById("defectRate").value = rate;
+      resultDiv.textContent = `${rate}%`;
+      document.getElementById("defectResults").classList.remove("hidden");
+    }
+
+    function calculateSample() {
+      const rate = parseFloat(document.getElementById("defectRate").value) / 100;
+      const conf = parseFloat(document.getElementById("confidence").value) / 100;
+      const resultDiv = document.getElementById("requiredSampleSize");
+      
+      if (isNaN(rate) || isNaN(conf) || rate <= 0 || conf <= 0 || conf >= 1) {
+        const errorMsg = document.querySelector('[lang="en"]').classList.contains('language-active') ? 
+          "Invalid input (0 < rate < 100, 0 < confidence < 100)" : 
+          "Entrada inválida (0 < tasa < 100, 0 < confianza < 100)";
+        resultDiv.textContent = errorMsg;
+        return;
+      }
+      
+      const n = Math.ceil(Math.log(1 - conf) / Math.log(1 - rate));
+      resultDiv.textContent = n;
+      document.getElementById("defectResults").classList.remove("hidden");
+    }
+  </script>
 </body>
 </html>
-
